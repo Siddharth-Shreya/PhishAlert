@@ -38,7 +38,7 @@ SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
 store = file.Storage('storage.json') 
 creds = store.get()
 if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
+    flow = client.flow_from_clientsecrets('client.json', SCOPES)
     creds = tools.run_flow(flow, store)
 GMAIL = discovery.build('gmail', 'v1', http=creds.authorize(Http()))
 
@@ -62,8 +62,12 @@ for mssg in mssg_list:
     payld = message['payload'] # get payload of the message 
     headr = payld['headers'] # get header of the payload
 	
-    print("--------- HEADER:", headr)
-    print("--------- PAYLOAD:", payld)
+    print("\n--------------- HEADER:")
+    for h in headr:
+        print(h)
+    print("\n--------------- PAYLOAD:")
+    for l in payld:
+        print(l)
 
     for one in headr: # getting the Subject
         if one['name'] == 'Subject':
@@ -116,13 +120,11 @@ for mssg in mssg_list:
     except :
         pass
 
+    print("\n--------------TEMP DICT")
     print (temp_dict)
     final_list.append(temp_dict) # This will create a dictonary item in the final list
 
     # This will mark the messagea as read
-    GMAIL.users().messages().modify(userId=user_id, id=m_id,body={ 'removeLabelIds': ['UNREAD']}).execute() 
-
-
 
 
     print ("Total messaged retrieved: ", str(len(final_list)))
