@@ -6,10 +6,9 @@ CREDIT TO Abhishek Chhibber
 
 '''
 This script does the following:
-- Go to Gmal inbox
+- Go to Gmail inbox
 - Find and read all the unread messages
-- Extract details (Date, Sender, Subject, Snippet, Body) and export them to a .csv file / DB
-- Mark the messages as Read - so that they are not read again 
+- Extract details (Date, Sender, Subject, Receiver, Body)
 '''
 
 '''
@@ -46,12 +45,10 @@ user_id =  'me'
 label_id_one = 'INBOX'
 
 # Getting all the emails from Inbox
-unread_msgs = GMAIL.users().messages().list(userId='me',labelIds=[label_id_one]).execute()
+msgs = GMAIL.users().messages().list(userId='me',labelIds=[label_id_one]).execute()
 
 # We get a dictonary. Now reading values for the key 'messages'
-mssg_list = unread_msgs['messages']
-
-print ("Total messages in inbox: ", str(len(mssg_list)))
+mssg_list = msgs['messages']
 
 final_list = [ ]
 
@@ -61,13 +58,6 @@ for mssg in mssg_list:
     message = GMAIL.users().messages().get(userId=user_id, id=m_id).execute() # fetch the message using API
     payld = message['payload'] # get payload of the message 
     headr = payld['headers'] # get header of the payload
-	
-    print("\n--------------- HEADER:")
-    for h in headr:
-        print(h)
-    print("\n--------------- PAYLOAD:")
-    for l in payld:
-        print(l)
 
     for one in headr: # getting the Subject
         if one['name'] == 'Subject':
@@ -76,14 +66,13 @@ for mssg in mssg_list:
         else:
             pass
 
-
     for two in headr: # getting the date
         if two['name'] == 'Date':
             msg_date = two['value']
-            date_parse = (parser.parse(msg_date))
-            m_date = (date_parse.date())
-            temp_dict['Date'] = str(m_date)
-            # convert to RFC 2822 format with local timezone
+            
+            msg_date = msg_date.split(" ")
+            msg_date = " ".join(msg_date[:-1])
+            temp_dict['Date'] = msg_date
         else:
             pass
 
@@ -94,59 +83,40 @@ for mssg in mssg_list:
         else:
             pass
 
-    temp_dict['Snippet'] = message['snippet'] # fetching message snippet
-
-
-    # need to get Receiver
+    for three in headr: # getting the Receiver
+        if three['name'] == 'To':
+            msg_from = three['value']
+            temp_dict['Receiver'] = msg_from
+        else:
+            pass
 	
+    # from ChatGPT
+    def get_body(payload):
+        body = ''
+        if 'parts' in payload:
+            for part in payload['parts']:
+                if part['mimeType'] == 'text/plain':
+                    body = base64.urlsafe_b64decode(part['body']['data']).decode('utf-8')
+                    return body.strip()
+                elif part['mimeType'] == 'text/html':
+                    body = base64.urlsafe_b64decode(part['body']['data']).decode('utf-8')
+                    soup = BeautifulSoup(body, "lxml").get_text()
+                    return soup.strip()
+                elif 'parts' in part:  # multipart within multipart
+                    body = get_body(part)
+        elif payload.get('mimeType') == 'text/plain':
+            body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8').strip()
+        elif payload.get('mimeType') == 'text/html':
+            body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8')
+            soup = BeautifulSoup(body, "lxml").get_text().strip()
+            body = soup
+        return body
 
-    try:
-        
-        # Fetching message body
-        mssg_parts = payld['parts'] # fetching the message parts
-        part_one  = mssg_parts[0] # fetching first element of the part 
-        part_body = part_one['body'] # fetching body of the message
-        part_data = part_body['data'] # fetching data from the body
-        clean_one = part_data.replace("-","+") # decoding from Base64 to UTF-8
-        clean_one = clean_one.replace("_","/") # decoding from Base64 to UTF-8
-        clean_two = base64.b64decode (bytes(clean_one, 'UTF-8')) # decoding from Base64 to UTF-8
-        soup = BeautifulSoup(clean_two , "lxml" )
-        mssg_body = soup.body()
-        # mssg_body is a readible form of message body
-        # depending on the end user's requirements, it can be further cleaned 
-        # using regex, beautiful soup, or any other method
-        temp_dict['Message_body'] = mssg_body
+    # Remove excessive internal whitespace and line breaks using regex
+    # from ChatGPT
+    temp_dict['Message_body'] = re.sub(r'\s+', ' ', get_body(payld).replace('\n', ' '))
 
-    except :
-        pass
-
-    print("\n--------------TEMP DICT")
-    print (temp_dict)
+    print(temp_dict)
     final_list.append(temp_dict) # This will create a dictonary item in the final list
 
-    # This will mark the messagea as read
-
-
-    print ("Total messaged retrieved: ", str(len(final_list)))
-
-    '''
-
-    The final_list will have dictionary in the following format:
-
-    {	'Sender': '"email.com" <name@email.com>', 
-    'Subject': 'Lorem ipsum dolor sit ametLorem ipsum dolor sit amet', 
-    'Date': 'yyyy-mm-dd', 
-    'Snippet': 'Lorem ipsum dolor sit amet'
-    'Message_body': 'Lorem ipsum dolor sit amet'}
-
-
-    The dictionary can be exported as a .csv or into a databse
-    '''
-
-    #exporting the values as .csv
-    with open('CSV_NAME.csv', 'w', encoding='utf-8', newline = '') as csvfile: 
-        fieldnames = ['Sender','Subject','Date','Snippet','Message_body']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter = ',')
-        writer.writeheader()
-        for val in final_list:
-            writer.writerow(val)
+    print("___________________________________________________\n\n")
