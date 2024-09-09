@@ -20,10 +20,6 @@ def preprocess(email):
     email = " ".join(email)
     return email
 
-@app.route('/')
-def phishalert():
-    return render_template('popup.html')
-
 @app.route('/predict', methods=['POST', 'GET'])
 def predict():
     data = request.json

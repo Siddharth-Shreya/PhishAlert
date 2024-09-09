@@ -1,0 +1,79 @@
+.container {
+  background-color: black;
+  min-height: 100vh;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.main {
+  text-align: center;
+}
+
+.hero {
+  margin-top: 50px;
+}
+
+.typingContainer h1 {
+  font-size: 2.5rem;
+  color: #fff;
+  text-shadow: 0 0 10px red, 0 0 20px red;
+}
+
+.features {
+  margin-top: 50px;
+}
+
+.cardContainer {
+  display: flex;
+  justify-content: space-around;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 20px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.card h3 {
+  color: red;
+  text-shadow: 0 0 10px red;
+}
+
+.card p {
+  color: rgb(255, 255, 255);
+  text-shadow: 0 0 10px rgb(255, 255, 255);
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+}
+
+.ctaButtons {
+  margin-top: 50px;
+}
+
+.btn {
+  background: red;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 25px;
+  font-size: 1.2rem;
+  margin: 0 10px;
+  transition: background 0.3s, box-shadow 0.3s;
+  box-shadow: 0 0 20px red;
+}
+
+.btn:hover {
+  background: #ff1a75;
+  box-shadow: 0 0 30px #ff1a75, 0 0 30px red;
+}
