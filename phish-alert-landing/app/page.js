@@ -3,6 +3,8 @@
 import { useEffect, useRef } from 'react'
 import Typed from 'typed.js'
 import styles from './styles/Home.module.css'
+import {HorizontalIcon} from './logos/horizontal.png'
+import Navbar from './Navbar'
 
 export default function Home(){
   const typedElement = useRef(null)
@@ -33,6 +35,7 @@ export default function Home(){
 
   return(
     <div className={styles.container}>
+      <Navbar />
       <main className={styles.main}>
         <section className={styles.hero}>
           <div className={styles.typingContainer}>
@@ -41,7 +44,7 @@ export default function Home(){
             </h1>
           </div>
         </section>
-
+        
         <section className={styles.features}>
           <div className={styles.cardContainer}>
             <div className={styles.card}>

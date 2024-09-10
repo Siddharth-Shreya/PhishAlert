@@ -1,0 +1,30 @@
+/* Navbar.module.css */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .logoContainer {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 200px;
+    height: auto;
+  }
+  
+  .navLinks a {
+    margin-left: 2rem;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .navLinks a:hover {
+    color: #007bff;
+  }
+  
