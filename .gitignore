@@ -42,4 +42,4 @@ next-env.d.ts
 
 # extension api keys
 # INCLUDE manifest.json in GIT ADDS
-manifest.json
+.manifest.json
