@@ -27,6 +27,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
+/.venv
 
 # vercel
 .vercel
@@ -35,4 +36,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/.venv
+# backend api keys
+/backend/client.json
+/backend/storage.json
+
+# extension api keys
+# INCLUDE manifest.json in GIT ADDS
+manifest.json
