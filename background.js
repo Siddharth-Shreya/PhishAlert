@@ -1,7 +1,7 @@
-function getAuthToken(callback) {
+function getAuthToken(callback){
   chrome.identity.getAuthToken({ interactive: true }, (token) => {
     if (chrome.runtime.lastError || !token) {
-      console.error('Error getting auth token:', chrome.runtime.lastError.message);
+      console.error('Error getting auth token:', chrome.runtime.lastError?.message);
       callback(null);
       return;
     }
