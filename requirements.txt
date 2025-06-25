@@ -1,0 +1,11 @@
+Flask
+numpy
+nltk
+google-api-python-client
+oauth2client
+httplib2
+beautifulsoup4
+python-dateutil
+lxml
+scikit-learn
+pandas

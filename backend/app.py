@@ -1,15 +1,14 @@
-from flask import Flask, render_template, request
+from flask import Flask, request
 import pickle
 import string
-import numpy as np
-import nltk
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
+from pathlib import Path
 
 app = Flask(__name__)
 
-model = pickle.load(open('../ml-model/email_phishing_detection.pkl', 'rb'))
-vectorizer = pickle.load(open('../ml-model/count_vectorizer.pkl', 'rb'))
+model = pickle.load(open(Path('../ml-model/email_phishing_detection.pkl'), 'rb'))
+vectorizer = pickle.load(open(Path('../ml-model/count_vectorizer.pkl'), 'rb'))
 
 def preprocess(email):
     stemmer = PorterStemmer()
@@ -29,7 +28,7 @@ def predict():
     receiver = data.receiver
     date = data.date
     urls = data.urls
-    combined_email = f"{sender} {receiver} {date} {subject} {body} {label} {urls}"
+    combined_email = f"{sender} {receiver} {date} {subject} {body} {urls}"
     preprocessed_email = preprocess(combined_email)
     transformed_email = vectorizer.transform([preprocessed_email])
     prediction = model.predict(transformed_email)[0]
@@ -42,10 +41,6 @@ def predict():
 def main():
     model = pickle.load(open('../ml-model/email_phishing_detection.pkl', 'rb'))
     vectorizer = pickle.load(open('../ml-model/count_vectorizer.pkl', 'rb'))
-    
-
-    print(f"Phishing Prediction: {prediction}")
-    print(f"Phishing Probability: {probability}")
 
 
 if __name__ == '__main__':
