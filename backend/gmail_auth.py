@@ -19,18 +19,11 @@ Also, client_secret.json should be saved in the same directory as this file
 
 # Importing required libraries
 from apiclient import discovery
-from apiclient import errors
 from httplib2 import Http
 from oauth2client import file, client, tools
 import base64
 from bs4 import BeautifulSoup
 import re
-import time
-import dateutil.parser as parser
-from datetime import datetime
-import datetime
-import csv
-
 
 # Creating a storage.JSON file with authentication details
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
@@ -52,6 +45,35 @@ mssg_list = msgs['messages']
 
 final_list = [ ]
 
+header_map = {
+    'Subject': 'Subject',
+    'Date': 'Date',
+    'From': 'Sender',
+    'To': 'Receiver'
+}
+
+# from ChatGPT
+def get_body(payload):
+    body = ''
+    if 'parts' in payload:
+        for part in payload['parts']:
+            if part['mimeType'] == 'text/plain':
+                body = base64.urlsafe_b64decode(part['body']['data']).decode('utf-8')
+                return body.strip()
+            elif part['mimeType'] == 'text/html':
+                body = base64.urlsafe_b64decode(part['body']['data']).decode('utf-8')
+                soup = BeautifulSoup(body, "lxml").get_text()
+                return soup.strip()
+            elif 'parts' in part:  # multipart within multipart
+                body = get_body(part)
+    elif payload.get('mimeType') == 'text/plain':
+        body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8').strip()
+    elif payload.get('mimeType') == 'text/html':
+        body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8')
+        soup = BeautifulSoup(body, "lxml").get_text().strip()
+        body = soup
+    return body
+
 for mssg in mssg_list:
     temp_dict = { }
     m_id = mssg['id'] # get id of individual message
@@ -59,58 +81,12 @@ for mssg in mssg_list:
     payld = message['payload'] # get payload of the message 
     headr = payld['headers'] # get header of the payload
 
-    for one in headr: # getting the Subject
-        if one['name'] == 'Subject':
-            msg_subject = one['value']
-            temp_dict['Subject'] = msg_subject
-        else:
-            pass
-
-    for two in headr: # getting the date
-        if two['name'] == 'Date':
-            msg_date = two['value']
-            
-            msg_date = msg_date.split(" ")
-            msg_date = " ".join(msg_date[:-1])
-            temp_dict['Date'] = msg_date
-        else:
-            pass
-
-    for three in headr: # getting the Sender
-        if three['name'] == 'From':
-            msg_from = three['value']
-            temp_dict['Sender'] = msg_from
-        else:
-            pass
-
-    for three in headr: # getting the Receiver
-        if three['name'] == 'To':
-            msg_from = three['value']
-            temp_dict['Receiver'] = msg_from
-        else:
-            pass
-	
-    # from ChatGPT
-    def get_body(payload):
-        body = ''
-        if 'parts' in payload:
-            for part in payload['parts']:
-                if part['mimeType'] == 'text/plain':
-                    body = base64.urlsafe_b64decode(part['body']['data']).decode('utf-8')
-                    return body.strip()
-                elif part['mimeType'] == 'text/html':
-                    body = base64.urlsafe_b64decode(part['body']['data']).decode('utf-8')
-                    soup = BeautifulSoup(body, "lxml").get_text()
-                    return soup.strip()
-                elif 'parts' in part:  # multipart within multipart
-                    body = get_body(part)
-        elif payload.get('mimeType') == 'text/plain':
-            body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8').strip()
-        elif payload.get('mimeType') == 'text/html':
-            body = base64.urlsafe_b64decode(payload['body']['data']).decode('utf-8')
-            soup = BeautifulSoup(body, "lxml").get_text().strip()
-            body = soup
-        return body
+    for header in headr:
+        if header['name'] in header_map:
+            value = header['value']
+            if header['name'] == 'Date':
+                value = ' '.join(value.split(' ')[:-1])
+            temp_dict[header_map[header['name']]] = value
 
     # Remove excessive internal whitespace and line breaks using regex
     # from ChatGPT
