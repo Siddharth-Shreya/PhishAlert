@@ -1,117 +1,96 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Popup loaded");
-    const checkAuthBtn = document.getElementById('checkAuth');
-    const dynamicContent = document.getElementById('dynamicContent');
+    async function authInit() {
+        const { authToken } = await chrome.storage.local.get('authToken');
 
-    chrome.storage.local.get('authToken', (result) => {
-        if (result.authToken) {
-            checkAuthBtn.innerText = 'Sign out';
+        if (authToken) {
+            checkAuthBtn.innerText = 'Sign Out'
             showScanEmailButton();
-        } else {
-            checkAuthBtn.innerText = 'Sign in with Google';
+        }
+        else {
+            checkAuthBtn.innerText = 'Sign In With Google';
             dynamicContent.innerHTML = '';
         }
-    });
-
-    checkAuthBtn.addEventListener('click', () => {
-        chrome.storage.local.get('authToken', (result) => {
-            if (result.authToken) {
-                fetch(`https://accounts.google.com/o/oauth2/revoke?token=${result.authToken}`)
-                    .then(() => {
-                        chrome.storage.local.remove('authToken', () => {
-                            checkAuthBtn.innerText = 'Sign in with Google';
-                            dynamicContent.innerHTML = '';
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error revoking token:', error);
-                    });
-            } else {
-                chrome.runtime.sendMessage({ action: 'getAuthToken' }, (response) => {
-                    if (!response || !response.token) {
-                        checkAuthBtn.innerText = 'Authorization failed.';
-                        return;
-                    }
-                    chrome.storage.local.set({ authToken: response.token }, () => {
-                        checkAuthBtn.innerText = 'Sign out';
-                        showScanEmailButton();
-                    });
-                });
-            }
-        });
-    });
-
-    function showScanEmailButton() {
+    }
+    
+    function showScanEmailButton () {
         dynamicContent.innerHTML = '';
         const scanEmailBtn = document.createElement('button');
         scanEmailBtn.id = 'checkEmails';
         scanEmailBtn.innerText = 'Scan Email';
         dynamicContent.appendChild(scanEmailBtn);
-
-        scanEmailBtn.addEventListener('click', () => {
-            chrome.storage.local.get('authToken', (result) => {
-                const token = result.authToken;
-                if (!token) {
-                    console.error("No auth token.");
-                    return;
-                }
-
-                const init = {
-                    method: 'GET',
-                    headers: {
-                        Authorization: 'Bearer ' + token,
-                        'Content-Type': 'application/json'
-                    }
-                };
-
-                fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages', init)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Emails:', data);
-                        fetchEmails(data.messages, init, dynamicContent);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching emails:', error);
-                    });
-            });
-        });
+        scanEmailBtn.addEventListener('click', handleScanClick);
     }
 
-    async function fetchEmails(messages, init, dynamicContent) {
-        if (!messages) {
-            dynamicContent.innerHTML += '<p>No emails found.</p>';
+    async function handleScanClick () {
+        const { authToken } = await chrome.storage.local.get('authToken');
+
+        if (!authToken) {
+            console.error('No auth token found');
             return;
         }
 
-        const emailDetails = [];
-        for (const msg of messages.slice(0, 5)) {
-            const msgResponse = await fetch(
-                `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date`,
-                init
-            );
-            const msgData = await msgResponse.json();
-            const headers = msgData.payload?.headers || [];
-            const subject = headers.find(h => h.name === "Subject")?.value || "(No Subject)";
-            const from = headers.find(h => h.name === "From")?.value || "(No Sender)";
-            const date = headers.find(h => h.name === "Date")?.value || "";
-            const snippet = msgData.snippet || "";
-            emailDetails.push({ subject, body: snippet, sender: from, receiver: "", date, urls: "" });
-        }
+        const params = { method: 'GET', headers: { 'Authorization': 'Bearer ' + authToken } };
 
         try {
-            const response = await fetch('https://localhost:5000/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(emailDetails),
-            });
+            const messagesResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5', params);
+            const { messages } = await messagesResponse.json();
 
-            const result = await response.json();
-            if (result && result.prediction === 1) {
-                // Handle the prediction logic here
+            if (!messages) {
+                dynamicContent.innerHTML += '<p>No emails found.</p>'
+                return;
             }
-            dynamicContent.innerHTML += '<h> </h>';
-        } catch (err) {
-            console.error('Error predicting email:', err);
+
+            await fetchEmails(messages, params);
+        }
+        catch (e) {
+            console.error('Error fetching emails using the API:', e);
         }
     }
-});
+
+    async function handleAuthClick () {
+        const { authToken } = await chrome.storage.local.get('authToken');
+
+        if (authToken) {
+            try {
+                await fetch(`https://accounts.google.com/o/oauth2/revoke?token=${authToken}`);
+                chrome.identity.removeCachedAuthToken({ token: authToken });
+                await chrome.storage.local.remove('authToken');
+                checkAuthBtn.innerText = 'Sign In With Google';
+                dynamicContent.innerHTML = '';
+            }
+            catch (e) {
+                console.error('Error revoking oauth token:', e);
+            }
+        }
+        else {
+            chrome.runtime.sendMessage({ action: 'getAuthToken' }, async (response) => {
+                if (!response) {
+                    checkAuthBtn.innerText = 'Auth failed.';
+                    return;
+                }
+                await chrome.storage.local.set({ authToken: response.token });
+                checkAuthBtn.innerText = 'Sign Out';
+                showScanEmailButton();
+            });
+        }
+    }
+
+    async function fetchEmails (messages, params) {
+        dynamicContent.innerHTML = '';
+        for (const msg of messages) {
+            const msgResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, params);
+            const msgData = await msgResponse.json();
+            for (const header of msgData.payload.headers) {
+                if (header.name === 'Subject') subject = header.value;
+                if (header.name === 'Date') date = header.value;
+            }
+            dynamicContent.innerHTML += `<li><b>${subject}</b><br><p>${date}</p></li>`;
+        }
+    }
+
+    const checkAuthBtn = document.getElementById('checkAuth');
+    const dynamicContent = document.getElementById('dynamicContent');
+    authInit();
+    checkAuthBtn.addEventListener('click', handleAuthClick);
+    }
+);
