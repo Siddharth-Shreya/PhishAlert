@@ -76,15 +76,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchEmails (messages, params) {
-        dynamicContent.innerHTML = '';
+        dynamicContent.innerHTML = '<br>';
+
         for (const msg of messages) {
             const msgResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, params);
             const msgData = await msgResponse.json();
+
+            let subject = '', date = '', body = '', from = '';
+
             for (const header of msgData.payload.headers) {
                 if (header.name === 'Subject') subject = header.value;
                 if (header.name === 'Date') date = header.value;
             }
-            dynamicContent.innerHTML += `<li><b>${subject}</b><br><p>${date}</p></li>`;
+
+            const flaskPayload = { subject, body, sender: from, date };
+            const flaskResult = await fetch('http://localhost:5000/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(flaskPayload) });
+            const flaskData = await flaskResult.json();
+
+            dynamicContent.innerHTML += `<li><b>${subject}</b><br><p>${date}</p><b>Phishing Probability: ${flaskData.probability}</b><br><b>Phishing Prediction: ${flaskData.prediction}</b></li>`;
         }
     }
 
