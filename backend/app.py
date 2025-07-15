@@ -1,11 +1,18 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pickle
 import string
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from pathlib import Path
 
+### Suggested Fix by AI
+from nltk import download
+download('stopwords')
+###
+
 app = Flask(__name__)
+CORS(app)
 
 model = pickle.load(open(Path('../ml-model/email_phishing_detection.pkl'), 'rb'))
 vectorizer = pickle.load(open(Path('../ml-model/count_vectorizer.pkl'), 'rb'))
@@ -19,29 +26,31 @@ def preprocess(email):
     email = " ".join(email)
     return email
 
-@app.route('/predict', methods=['POST', 'GET'])
+@app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json
-    subject = data.subject
-    body = data.body
-    sender = data.sender
-    receiver = data.receiver
-    date = data.date
-    urls = data.urls
-    combined_email = f"{sender} {receiver} {date} {subject} {body} {urls}"
+    data = request.get_json()
+
+    subject = data.get('subject', '')
+    body = data.get('body', '')
+    sender = data.get('sender', '')
+    receiver = data.get('receiver', '')
+    date = data.get('date', '')
+    urls = data.get('urls', '')
+
+    combined_email = f'{sender} {receiver} {date} {subject} {body} {urls}'
     preprocessed_email = preprocess(combined_email)
     transformed_email = vectorizer.transform([preprocessed_email])
-    prediction = model.predict(transformed_email)[0]
-    probability = model.predict_proba(transformed_email)[0][1]
-    print(f"Phishing Prediction: {prediction}")
-    print(f"Phishing Probability: {probability}")
+    prediction = int(model.predict(transformed_email)[0])
+    probability = float(model.predict_proba(transformed_email)[0][1])
+    
+    print(f'Phishing Prediction: {prediction}')
+    print(f'Phishing Probability: {probability}')
 
-# Testing
+    return jsonify({'prediction': prediction, 'probability': probability})
 
 def main():
     model = pickle.load(open('../ml-model/email_phishing_detection.pkl', 'rb'))
     vectorizer = pickle.load(open('../ml-model/count_vectorizer.pkl', 'rb'))
-
 
 if __name__ == '__main__':
     main()
