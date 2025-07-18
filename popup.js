@@ -1,15 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
-    async function authInit() {
+
+    async function isTokenValid(token) {
+        try {
+            const response = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=` + token);
+            return response.ok;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+
+    async function authInit () {
         const { authToken } = await chrome.storage.local.get('authToken');
 
         if (authToken) {
-            checkAuthBtn.innerText = 'Sign Out'
-            showScanEmailButton();
+            const validToken = await isTokenValid(authToken);
+            if (validToken) {
+                checkAuthBtn.innerText = 'Sign Out';
+                showScanEmailButton();
+                return;
+            }
+            else {
+                await chrome.storage.local.remove('authToken');
+            }
         }
-        else {
-            checkAuthBtn.innerText = 'Sign In With Google';
-            dynamicContent.innerHTML = '';
-        }
+        checkAuthBtn.innerText = 'Sign In With Google';
+        dynamicContent.innerHTML = '';
     }
     
     function showScanEmailButton () {
@@ -63,12 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         else {
-            chrome.runtime.sendMessage({ action: 'getAuthToken' }, async (response) => {
-                if (!response) {
+            chrome.identity.getAuthToken({ interactive: true }, async (token) => {
+                if (!token) {
                     checkAuthBtn.innerText = 'Auth failed.';
                     return;
                 }
-                await chrome.storage.local.set({ authToken: response.token });
+                await chrome.storage.local.set({ authToken: token });
                 checkAuthBtn.innerText = 'Sign Out';
                 showScanEmailButton();
             });
