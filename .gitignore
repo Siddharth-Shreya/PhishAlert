@@ -26,6 +26,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env*
 .env*.local
 /.venv
 
@@ -36,10 +37,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# backend api keys
-/backend/client.json
-/backend/storage.json
+# cached files
+backend/__pycache__
 
-# extension api keys
-# INCLUDE manifest.json in GIT ADDS
+# local manifest - a temporary template of manifest.json will be committed
 manifest.json
