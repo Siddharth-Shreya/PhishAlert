@@ -91,6 +91,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function parseBody(payload) {
+        let body = '';
+
+        function urlSafeB64Decode(str) {
+            const base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
+            const padding = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
+            const base64WithPadding = base64Encoded + padding;
+            return atob(base64WithPadding)
+                .split('')
+                .map(char => String.fromCharCode(char.charCodeAt(0)))
+                .join('');
+        }
+
+        if (payload.parts) {
+            for (const part of payload.parts) {
+            if (part.mimeType === 'text/plain') {
+                body = urlSafeB64Decode(part.body.data);
+                console.log("body:", body)
+                return body.trim();
+            } else if (part.mimeType === 'text/html') {
+                body = urlSafeB64Decode(part.body.data);
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(body, 'text/html');
+                console.log("body:", doc.body ? doc.body.textContent.trim() : '')
+                return doc.body ? doc.body.textContent.trim() : '';
+            } else if (part.parts) { 
+                body = parseBody(part);
+                if (body) { 
+                    console.log("body:", body)
+                    return body;
+                }
+            }
+            }
+        } else if (payload.mimeType === 'text/plain') {
+            body = urlSafeB64Decode(payload.body.data).trim();
+        } else if (payload.mimeType === 'text/html') {
+            body = urlSafeB64Decode(payload.body.data);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(body, 'text/html');
+            body = doc.body ? doc.body.textContent.trim() : '';
+        }
+
+        console.log("body:", body)
+
+        return body;
+    }
+
+
+
     async function fetchEmails (messages, params) {
         dynamicContent.innerHTML = '<br>';
 
@@ -98,12 +147,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, params);
             const msgData = await msgResponse.json();
 
+            console.log("Message data")
+            console.log(msgData)
+
             let subject = '', date = '', body = '', from = '';
 
             for (const header of msgData.payload.headers) {
                 if (header.name === 'Subject') subject = header.value;
                 if (header.name === 'Date') date = header.value;
             }
+
+            body = parseBody(msgData.payload);
 
             const flaskPayload = { subject, body, sender: from, date };
             const flaskResult = await fetch('http://localhost:5000/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(flaskPayload) });
