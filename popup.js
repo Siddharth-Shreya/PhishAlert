@@ -91,9 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // inspired from https://github.com/abhishekchhibber/Gmail-Api-through-Python/blob/master/gmail_read.py, ChatGPT, and Gemini
     function parseBody(payload) {
         let body = '';
 
+        // from https://stackoverflow.com/questions/5234581/base64url-decoding-via-javascript
         function urlSafeB64Decode(str) {
             const base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
             const padding = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
