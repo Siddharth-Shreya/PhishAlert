@@ -97,6 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // from https://stackoverflow.com/questions/5234581/base64url-decoding-via-javascript
         function urlSafeB64Decode(str) {
+            /*
+            - replace + with -, _ with /
+            - padding is included in since Base64 requires string to of length multiple of 4
+            - decode Base64 string -> original byte sequence -> character -> joins characters
+            */
             const base64Encoded = str.replace(/-/g, '+').replace(/_/g, '/');
             const padding = str.length % 4 === 0 ? '' : '='.repeat(4 - (str.length % 4));
             const base64WithPadding = base64Encoded + padding;
@@ -106,25 +111,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 .join('');
         }
 
+        /*
+        - Mimetype: classifies file formats / content formats
+        - .trim(): remove whitespaces from beginning and end of string
+        - parser.parseFromString: parses html body
+        */
         if (payload.parts) {
             for (const part of payload.parts) {
-            if (part.mimeType === 'text/plain') {
-                body = urlSafeB64Decode(part.body.data);
-                console.log("body:", body)
-                return body.trim();
-            } else if (part.mimeType === 'text/html') {
-                body = urlSafeB64Decode(part.body.data);
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(body, 'text/html');
-                console.log("body:", doc.body ? doc.body.textContent.trim() : '')
-                return doc.body ? doc.body.textContent.trim() : '';
-            } else if (part.parts) { 
-                body = parseBody(part);
-                if (body) { 
-                    console.log("body:", body)
-                    return body;
+                if (part.mimeType === 'text/plain') {
+                    body = urlSafeB64Decode(part.body.data);
+                    return body.trim();
+                } else if (part.mimeType === 'text/html') {
+                    body = urlSafeB64Decode(part.body.data);
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(body, 'text/html');
+                    return doc.body ? doc.body.textContent.trim() : '';
+                } else if (part.parts) { 
+                    body = parseBody(part);
+                    if (body) { 
+                        return body;
+                    }
                 }
-            }
             }
         } else if (payload.mimeType === 'text/plain') {
             body = urlSafeB64Decode(payload.body.data).trim();
@@ -134,9 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const doc = parser.parseFromString(body, 'text/html');
             body = doc.body ? doc.body.textContent.trim() : '';
         }
-
-        console.log("body:", body)
-
         return body;
     }
 
