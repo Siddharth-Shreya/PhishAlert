@@ -30,12 +30,21 @@ def preprocess(email):
 def predict():
     data = request.get_json()
 
-    subject = data.get('subject', '')
-    body = data.get('body', '')
-    sender = data.get('sender', '')
-    receiver = data.get('receiver', '')
-    date = data.get('date', '')
-    urls = data.get('urls', '')
+    if data is None:
+        return jsonify({'error': 'Invalid or missing JSON'}), 400
+
+    required_fields = ['subject', 'body', 'sender', 'receiver', 'date', 'urls']
+    missing_fields = [field for field in required_fields if field not in data or data[field] is None or str(data[field]).strip() == '' or not isinstance(data[field], str)]
+    
+    if missing_fields:
+        return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+    
+    subject = data['subject']
+    body = data['body']
+    sender = data['sender']
+    receiver = data['receiver']
+    date = data['date']
+    urls = data['urls']
 
     combined_email = f'{sender} {receiver} {date} {subject} {body} {urls}'
     preprocessed_email = preprocess(combined_email)

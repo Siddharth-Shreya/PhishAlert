@@ -1,0 +1,72 @@
+{
+  "subjects": [
+    "Action Required: Password Expiration for Microsoft 365",
+    "Urgent Request: Wire Transfer Needed for Project Apollo",
+    "Updated Banking Instructions for Invoice #1473",
+    "Please Review: Updated Remote Work Policy Policy",
+    "[External] John.Doe Shared a Document with You",
+    "Payment Issue: Immediate Attention Required",
+    "Suspicious Login Attempt Detected - Action Required",
+    "Confirm Your Direct Deposit Details",
+    "Action Required: MFA System Update",
+    "[Invite] Strategy Planning Session with Jane Smith",
+    "Required: Zoom Security Update",
+    "Final Reminder: Benefits Enrollment Ends Tomorrow"
+  ],
+  "bodies": [
+    "Your Microsoft 365 password will expire in 24 hours. To avoid disruption, reset your password now using the secure link below.",
+    "Please process a wire transfer of $250,000 to VendCo Inc. today to finalize the Project Apollo contract. I'm in meetings and can't call - just confirm once done.\n\nSignature: Michael Johnson, CEO",
+    "Please note our new remittance details for Invoice #1473, due on July 31, 2025. Let us know once payment is sent.\n\nAttachment: New_Bank_Details.pdf",
+    "All employees are required to review and sign the updated Remote Work Policy policy. Download the document, review, and sign by July 30, 2025.\n\nAttachment: Remote_Work_Policy_2025.docx",
+    "John.Doe has sent you a secure file via OneDrive. Click below to access the document.\n\nCTA Button: View Document",
+    "We were unable to process your recent payment to VendCo Inc. Please call our billing department at (888) 555-1234 to avoid service disruption.",
+    "We detected a login attempt from an unrecognized device. Scan the QR code below to verify your identity and secure your account.\n\nImage: Embedded QR Code",
+    "Ahead of our upcoming payroll cycle, please confirm your direct deposit information to avoid delays. Use the secure form linked below.\n\nCTA Button: Confirm Details",
+    "We've made changes to our MFA system. You may receive a verification prompt - please approve it to finalize setup.\n\nSignature: IT Security Team",
+    "Please review the meeting agenda in advance: https://meeting-platform.com/agenda. Let me know if you have any questions before we meet.\n\nAdd to Calendar: agenda.ics",
+    "Install the attached update to continue using Zoom with the latest compliance settings.\n\nAttachment: Zoom_Update_Installer.pkg",
+    "Click below to finalize your 2025 elections before the window closes.\n\nCTA Button: Review Benefits"
+  ],
+  "senders": [
+    "security@microsoftonline.com",
+    "ceo@projectapollo-corp.com",
+    "billing@office365-support.com",
+    "hr@companypolicy.microsoft.com",
+    "share@onedrive.live.com",
+    "billing@paypal-support.com",
+    "no-reply@accounts.google.com",
+    "payroll@intuit-payroll.com",
+    "it@okta-security.com",
+    "calendar@outlook.com",
+    "updates@zoom.us",
+    "benefits@workday.com"
+  ],
+  "receivers": [
+    "john.doe@example.com",
+    "jane.smith@corporatecorp.com",
+    "employee@financecorp.com",
+    "admin@company-domain.com",
+    "user@businessmail.net",
+    "customer.service@gmail.com",
+    "hr@trustedcompany.com",
+    "victim@popularmail.com",
+    "helpdesk@corp.com",
+    "contact@business.org",
+    "staff@techfirm.com",
+    "ceo@startups.com"
+  ],
+  "urls": [
+    "https://login.microsoftonline.com/?wa=wsignin1.0",
+    "https://projectapollo-corp.com/payments/transfer",
+    "https://office365-support.com/remittance/1473",
+    "https://companypolicy.microsoft.com/policy/remote2025",
+    "https://onedrive.live.com/?auth=sharedocument",
+    "tel:+18885551234",
+    "https://accounts.google.com/signin/challenge/qrcode",
+    "https://intuit-payroll.com/verify-deposit",
+    "https://okta-security.com/mfa/update",
+    "https://outlook.com/calendar/agenda.ics",
+    "https://zoom.us/update/installer.pkg",
+    "https://workday.com/benefits/enrollment"
+  ]
+}
