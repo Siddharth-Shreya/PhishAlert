@@ -38,7 +38,7 @@ yarn-error.log*
 next-env.d.ts
 
 # cached files
-backend/__pycache__
+*/__pycache__
 
 # local manifest - a temporary template of manifest.json will be committed
 manifest.json
