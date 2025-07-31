@@ -28,9 +28,12 @@ def preprocess(email):
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json()
 
-    if data is None:
+    if not request.is_json:
+        return jsonify({'error': 'Unsupported Media Type'}), 415
+    
+    data = request.get_json()
+    if not data or data is None or '' in data:
         return jsonify({'error': 'Invalid or missing JSON'}), 400
 
     required_fields = ['subject', 'body', 'sender', 'receiver', 'date', 'urls']
@@ -55,7 +58,7 @@ def predict():
     print(f'Phishing Prediction: {prediction}')
     print(f'Phishing Probability: {probability}')
 
-    return jsonify({'prediction': prediction, 'probability': probability})
+    return jsonify({'prediction': prediction, 'probability': probability}), 200
 
 def main():
     model = pickle.load(open('../ml-model/email_phishing_detection.pkl', 'rb'))
