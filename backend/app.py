@@ -28,14 +28,26 @@ def preprocess(email):
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json()
 
-    subject = data.get('subject', '')
-    body = data.get('body', '')
-    sender = data.get('sender', '')
-    receiver = data.get('receiver', '')
-    date = data.get('date', '')
-    urls = data.get('urls', '')
+    if not request.is_json:
+        return jsonify({'error': 'Unsupported Media Type'}), 415
+    
+    data = request.get_json()
+    if not data or data is None or '' in data:
+        return jsonify({'error': 'Invalid or missing JSON'}), 400
+
+    required_fields = ['subject', 'body', 'sender', 'receiver', 'date', 'urls']
+    missing_fields = [field for field in required_fields if field not in data or data[field] is None or str(data[field]).strip() == '' or not isinstance(data[field], str)]
+    
+    if missing_fields:
+        return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
+    
+    subject = data['subject']
+    body = data['body']
+    sender = data['sender']
+    receiver = data['receiver']
+    date = data['date']
+    urls = data['urls']
 
     combined_email = f'{sender} {receiver} {date} {subject} {body} {urls}'
     preprocessed_email = preprocess(combined_email)
@@ -46,11 +58,12 @@ def predict():
     print(f'Phishing Prediction: {prediction}')
     print(f'Phishing Probability: {probability}')
 
-    return jsonify({'prediction': prediction, 'probability': probability})
+    return jsonify({'prediction': prediction, 'probability': probability}), 200
 
 def main():
-    model = pickle.load(open('../ml-model/email_phishing_detection.pkl', 'rb'))
-    vectorizer = pickle.load(open('../ml-model/count_vectorizer.pkl', 'rb'))
+    # model = pickle.load(open('../ml-model/email_phishing_detection.pkl', 'rb'))
+    # vectorizer = pickle.load(open('../ml-model/count_vectorizer.pkl', 'rb'))
+    pass
 
 if __name__ == '__main__':
     main()

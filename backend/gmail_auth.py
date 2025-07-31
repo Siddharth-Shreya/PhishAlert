@@ -1,3 +1,10 @@
+from apiclient import discovery
+from httplib2 import Http
+from oauth2client import file, client, tools
+import base64
+from bs4 import BeautifulSoup
+import re
+
 '''
 
 FROM : https://github.com/abhishekchhibber/Gmail-Api-through-Python/blob/master/gmail_read.py
@@ -18,12 +25,6 @@ Also, client_secret.json should be saved in the same directory as this file
 '''
 
 # Importing required libraries
-from apiclient import discovery
-from httplib2 import Http
-from oauth2client import file, client, tools
-import base64
-from bs4 import BeautifulSoup
-import re
 
 # Creating a storage.JSON file with authentication details
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
