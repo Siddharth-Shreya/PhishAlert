@@ -61,8 +61,9 @@ def predict():
     return jsonify({'prediction': prediction, 'probability': probability}), 200
 
 def main():
-    model = pickle.load(open('../ml-model/email_phishing_detection.pkl', 'rb'))
-    vectorizer = pickle.load(open('../ml-model/count_vectorizer.pkl', 'rb'))
+    # model = pickle.load(open('../ml-model/email_phishing_detection.pkl', 'rb'))
+    # vectorizer = pickle.load(open('../ml-model/count_vectorizer.pkl', 'rb'))
+    pass
 
 if __name__ == '__main__':
     main()

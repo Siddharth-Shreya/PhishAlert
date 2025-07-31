@@ -10,3 +10,4 @@ python-dateutil
 lxml
 scikit-learn
 pandas
+ruff
