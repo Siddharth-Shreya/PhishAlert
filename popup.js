@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const params = { method: 'GET', headers: { 'Authorization': 'Bearer ' + authToken } };
 
         try {
-            const messagesResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5', params);
+            const messagesResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?q=in:anywhere AND newer_than:1d AND -in:spam AND -in:trash', params);
             const { messages } = await messagesResponse.json();
 
             if (!messages) {
