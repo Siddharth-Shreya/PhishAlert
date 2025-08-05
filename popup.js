@@ -153,23 +153,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, params);
             const msgData = await msgResponse.json();
 
-            console.log("Message data")
-            console.log(msgData)
+            // console.log("Message data")
+            // console.log(msgData)
 
-            let subject = '', date = '', body = '', from = '';
+            let subject = '', date = '', body = '', sender = '', receiver = '', urls = 'https://gmail.google.com';
 
             for (const header of msgData.payload.headers) {
                 if (header.name === 'Subject') subject = header.value;
                 if (header.name === 'Date') date = header.value;
+                if (header.name === 'From') sender = header.value;
+                if (header.name === 'To') receiver = header.value;
             }
 
             body = parseBody(msgData.payload);
 
-            const flaskPayload = { subject, body, sender: from, date };
+            const flaskPayload = { subject, body, sender, receiver, date, urls };
             const flaskResult = await fetch('http://localhost:5000/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(flaskPayload) });
             const flaskData = await flaskResult.json();
+            const scamEmails = [];
 
-            dynamicContent.innerHTML += `<li><b>${subject}</b><br><p>${date}</p><b>Phishing Probability: ${flaskData.probability}</b><br><b>Phishing Prediction: ${flaskData.prediction}</b></li>`;
+            if (flaskData.probability > 0.7) {
+                scamEmails.push({ subject, date, probability: flaskData.probability, prediction: flaskData.prediction });
+                dynamicContent.innerHTML += `<li><b>${subject}</b><br><p>${date}</p><b>Phishing Probability: ${flaskData.probability}</b><br><b>Phishing Prediction: ${flaskData.prediction}</b></li>`;
+            }
         }
     }
 
