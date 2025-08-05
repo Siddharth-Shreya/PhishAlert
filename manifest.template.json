@@ -10,7 +10,7 @@
     "background": {
       "service_worker": "background.js"
     },
-    "permissions": ["identity", "storage"],
+    "permissions": ["identity", "storage", "alarms"],
     "oauth2": {
       "client_id": "client_id.apps.googleusercontent.com",
       "scopes": [
