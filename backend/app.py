@@ -6,11 +6,6 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from pathlib import Path
 
-### Suggested Fix by AI
-from nltk import download
-download('stopwords')
-###
-
 app = Flask(__name__)
 CORS(app)
 

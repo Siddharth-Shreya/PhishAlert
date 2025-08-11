@@ -10,6 +10,8 @@ COPY backend/ ./backend
 
 COPY ml-model/ ./ml-model
 
+RUN python -m nltk.downloader stopwords
+
 ENV FLASK_APP=backend.app
 
 ENV FLASK_RUN_HOST=0.0.0.0
