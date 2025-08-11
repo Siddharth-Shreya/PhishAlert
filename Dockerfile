@@ -18,4 +18,6 @@ ENV FLASK_RUN_PORT=5000
 
 EXPOSE 5000
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "backend.app:app"]
+WORKDIR /app/backend
+
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
