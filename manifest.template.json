@@ -11,6 +11,7 @@
       "service_worker": "background.js"
     },
     "permissions": ["identity", "storage", "alarms"],
+    "options_page": "options.html",
     "oauth2": {
       "client_id": "client_id.apps.googleusercontent.com",
       "scopes": [
