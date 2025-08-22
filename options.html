@@ -9,30 +9,32 @@
 			<button id="authBtn">Sign in</button>
 			<h2>Inbox Query</h2>
 			<form id="queryForm">
-				<fieldset>
+				<fieldset class="locations-row">
 					<legend>Locations</legend>
 					<label>
 						<input type="checkbox" id="inbox" checked>
 						Inbox
 					</label>
 					<label>
-						<input type="checkbox" id="sent">
+						<input type="checkbox" id="sent" checked>
 						Sent
 					</label>
 					<label>
-						<input type="checkbox" id="all">
+						<input type="checkbox" id="all" checked>
 						All
 					</label>
 				</fieldset>
-
-				<label>
-					<input type="checkbox" id="excludeSpam" checked>
-					Exclude Spam
-				</label>
-				<label>
-					<input type="checkbox" id="excludeTrash" checked>
-					Exclude Trash
-				</label>
+                <fieldset class="locations-row">
+                    <legend>Exclusions</legend>
+                    <label>
+                        <input type="checkbox" id="excludeSpam" checked>
+                        Exclude Spam
+                    </label>
+                    <label>
+                        <input type="checkbox" id="excludeTrash" checked>
+                        Exclude Trash
+                    </label>
+                </fieldset>
 			</form>
 		</div>
 		<script src="options.js"></script>
