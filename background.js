@@ -15,7 +15,6 @@ chrome.alarms.onAlarm.addListener(async function (alarm) {
 
     try {
         await handleScanClick();
-        chrome.runtime.sendMessage({ action: 'fetchFinished' });
     }
     catch (e) {
         chrome.runtime.sendMessage({ action: 'fetchFailed', error: e.message });
@@ -30,8 +29,11 @@ async function handleScanClick () {
         return;
     }
 
+    const { gmailQuery } = await chrome.storage.local.get('gmailQuery');
+
     const params = { method: 'GET', headers: { 'Authorization': 'Bearer ' + authToken } };
-    const messagesResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?q=in:anywhere AND -in:spam AND -in:trash AND (newer_than:2d OR is:unread)', params);
+    const queryUrl = gmailQuery || 'https://gmail.googleapis.com/gmail/v1/users/me/messages?q=in:anywhere AND -in:spam AND -in:trash AND (newer_than:2d OR is:unread)'
+    const messagesResponse = await fetch(queryUrl, params);
     const { messages } = await messagesResponse.json();
 
     if (!messages) return [];
@@ -44,9 +46,6 @@ async function fetchEmails (messages, params) {
     for (const msg of messages) {
         const msgResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, params);
         const msgData = await msgResponse.json();
-
-        // console.log("Message data")
-        // console.log(msgData)
 
         let subject = '', date = '', body = '', sender = '', receiver = '', urls = 'https://gmail.google.com';
 
@@ -67,7 +66,7 @@ async function fetchEmails (messages, params) {
             scamEmails.push({ subject, date, probability: flaskData.probability, prediction: flaskData.prediction });
         }
     }
-    await chrome.storage.local.set({ lastResults: scamEmails });
+    chrome.runtime.sendMessage({ action: 'fetchFinished', results: scamEmails });
     return scamEmails;
 }
 

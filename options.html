@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <link rel="stylesheet" href="style.css"/>
+	</head>
+	<body>
+		<div class="center">
+			<h1 class="title">PhishAlert Settings</h1>
+			<button id="authBtn">Sign in</button>
+			<h2>Inbox Query</h2>
+			<form id="queryForm">
+				<fieldset>
+					<legend>Locations</legend>
+					<label>
+						<input type="checkbox" id="inbox" checked>
+						Inbox
+					</label>
+					<label>
+						<input type="checkbox" id="sent">
+						Sent
+					</label>
+					<label>
+						<input type="checkbox" id="all">
+						All
+					</label>
+				</fieldset>
+
+				<label>
+					<input type="checkbox" id="excludeSpam" checked>
+					Exclude Spam
+				</label>
+				<label>
+					<input type="checkbox" id="excludeTrash" checked>
+					Exclude Trash
+				</label>
+			</form>
+		</div>
+		<script src="options.js"></script>
+	</body>
+</html>

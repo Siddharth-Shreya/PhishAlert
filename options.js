@@ -74,4 +74,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     ['inbox', 'sent', 'all', 'excludeSpam', 'excludeTrash'].forEach(id => {
         document.getElementById(id).onchange = saveQuery;
     });
+
+    document.getElementById('authBtn').addEventListener('click', async () => {
+        await handleAuthClick();
+        await authInit();
+    });
+    await authInit();
+    saveQuery();
 });
