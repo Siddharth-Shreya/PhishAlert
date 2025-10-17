@@ -1,5 +1,12 @@
 FROM python:3-slim
 
+RUN apt-get update && \
+    apt-get install -y git && \
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get install -y git-lfs
+
+RUN git lfs install
+
 WORKDIR /app
 
 COPY requirements.txt ./
