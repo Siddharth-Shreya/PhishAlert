@@ -1,8 +1,12 @@
 services:
   backend:
     build: .
+    container_name: backend
+    mem_limit: 512m
+    memswap_limit: 1g
     ports:
       - "5000:5000"
     environment:
       - FLASK_APP=app.backend.app
       - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_ENV=production
