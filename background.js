@@ -1,4 +1,23 @@
-chrome.runtime.onMessage.addListener(function (message, sendResponse) {
+async function safeSendMessage(msg) {
+    try {
+        await chrome.runtime.sendMessage(msg);
+    }
+    catch (e) {
+        console.log('No listener for message:', msg.action, e.message);
+    }
+}
+
+chrome.runtime.onMessage.addListener(async function (message, sendResponse) {
+    if (message.action === 'popupOpened') {
+        try {
+            await handleScanClick();
+            safeSendMessage({ action: 'fetchFinished', results: [] });
+        }
+        catch (e) {
+            safeSendMessage({ action: 'fetchFailed', error: e.message });
+        }
+    }
+
     if (message.action === 'getAuthToken') {
         chrome.identity.getAuthToken({ interactive: true }, (token) => {
             sendResponse({ token });
@@ -7,17 +26,37 @@ chrome.runtime.onMessage.addListener(function (message, sendResponse) {
     }
 });
 
+chrome.runtime.onStartup.addListener(async function () {
+    try {
+        await handleScanClick();
+        safeSendMessage({ action: 'fetchFinished', results: [] });
+    }
+    catch (e) {
+        safeSendMessage({ action: 'fetchFailed', error: e.message });
+    }
+})
+
+chrome.runtime.onInstalled.addListener(async function () {
+    try {
+        await handleScanClick();
+        safeSendMessage({ action: 'fetchFinished', results: [] });
+    }
+    catch (e) {
+        safeSendMessage({ action: 'fetchFailed', error: e.message });
+    }
+})
+
 chrome.alarms.create('scheduledEmailFetch', { periodInMinutes: 1 });
 
 chrome.alarms.onAlarm.addListener(async function (alarm) {
     if (alarm.name !== 'scheduledEmailFetch') return;
-    chrome.runtime.sendMessage({ action: 'fetchStarted' });
+    safeSendMessage({ action: 'fetchStarted' });
 
     try {
         await handleScanClick();
     }
     catch (e) {
-        chrome.runtime.sendMessage({ action: 'fetchFailed', error: e.message });
+        safeSendMessage({ action: 'fetchFailed', error: e.message });
     }
 });
 
@@ -58,15 +97,21 @@ async function fetchEmails (messages, params) {
 
         body = parseBody(msgData.payload);
 
+        process.loadEnvFile('.env');
         const flaskPayload = { subject, body, sender, receiver, date, urls };
-        const flaskResult = await fetch('http://localhost:5000/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(flaskPayload) });
+        const flaskResult = await fetch(process.env.API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(flaskPayload) });
         const flaskData = await flaskResult.json();
 
         if (flaskData.prediction == 1) {
             scamEmails.push({ subject, date, probability: flaskData.probability, prediction: flaskData.prediction });
         }
     }
-    chrome.runtime.sendMessage({ action: 'fetchFinished', results: scamEmails });
+    try {
+        safeSendMessage({ action: 'fetchFinished', results: scamEmails });
+    }
+    catch (e) {
+        safeSendMessage({ action: 'fetchFailed', error: e.message });
+    }
     return scamEmails;
 }
 

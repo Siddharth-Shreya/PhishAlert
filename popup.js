@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    chrome.runtime.sendMessage({ action: 'popupOpened' });
+    
     const dynamicContent = document.getElementById('dynamicContent');
 
     chrome.runtime.onMessage.addListener(msg => {
