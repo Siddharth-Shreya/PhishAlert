@@ -1,7 +1,7 @@
 FROM python:3-slim
 
 RUN apt-get update && \
-    apt-get install -y git && \
+    apt-get install -y git curl && \
     curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
     apt-get install -y git-lfs
 

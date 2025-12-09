@@ -12,3 +12,5 @@ scikit-learn
 pandas
 ruff
 gunicorn
+redis
+xxhash
